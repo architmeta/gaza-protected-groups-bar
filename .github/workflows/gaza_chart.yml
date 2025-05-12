@@ -1,5 +1,3 @@
-Here is the full content of the `.github/workflows/gaza_chart.yml` file:
-
 ```yaml
 name: Gaza Chart Daily Update
 
