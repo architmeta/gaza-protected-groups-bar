@@ -1,0 +1,41 @@
+name: Gaza Chart Daily Update
+
+on:
+  schedule:
+    # Runs every day at 11:00 AM EDT (15:00 UTC)
+    - cron: '0 15 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: gaza-chart-autoupdate
+  cancel-in-progress: true
+
+jobs:
+  run-notebook:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install pandas matplotlib requests nbconvert
+
+      - name: Execute Jupyter notebook
+        run: |
+          jupyter nbconvert --to notebook --execute --inplace gaza_chart.ipynb
+
+      - name: Commit and push updated files
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add gaza_daily.csv gaza_death_toll_chart.png gaza_chart.ipynb
+          git commit -m "Auto-update Gaza chart and CSV [skip ci]" || echo "No changes to commit"
+          git push
